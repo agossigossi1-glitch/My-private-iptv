@@ -1,0 +1,29 @@
+name: 24/7 IPTV Link Refresher
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs automatically every single day at midnight
+  workflow_dispatch: # Allows you to trigger it manually anytime with one click
+
+jobs:
+  refresh-link:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Run CP24 Extractor
+      run: python get_stream.py
+
+    - name: Commit and Push Changes back to GitHub
+      run: |
+        git config --global user.name "GitHub Action Engine"
+        git config --global user.email "actions@github.com"
+        git add cp24_live.m3u
+        git commit -m "Automated cloud link refresh" || exit 0
+        git push
